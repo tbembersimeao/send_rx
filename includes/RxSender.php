@@ -391,13 +391,14 @@ class RxSender {
             }
 
             $message = array();
-            foreach (array('subject', 'body') as $section) {
-                $field = 'send_rx_' . $type . '_' . $section;
-                $message[$section] = send_rx_piping(empty($this->siteData[$field]) ? $this->siteConfig['message_' . $section] : $this->siteData[$field], $data);
-            }
 
             switch ($type) {
                 case 'email':
+                    foreach (array('subject', 'body') as $section) {
+                        $field = 'send_rx_' . $type . '_' . $section;
+                        $message[$section] = send_rx_piping(empty($this->siteData[$field]) ? $this->siteConfig['message_' . $section] : $this->siteData[$field], $data);
+                    }
+
                     // TODO: Discuss and define properly the "from" address.
                     $success = REDCap::email($this->siteData['send_rx_email_recipients'], $this->prescriberData['send_rx_user_email'], $message['subject'], $message['body']);
                     $this->log($type, $success, $this->siteData['send_rx_email_recipients'], $message['subject'], $message['body']);
@@ -405,8 +406,38 @@ class RxSender {
                     break;
 
                 case 'hl7':
-                    // TODO: handle HL7 messages.
+                    // Step 1: check for schema from config
+                    // Step 2: create an output array
+                    // Step 3: loop over schema, pipe each row and populate output array
+                    // Step 4: instantiate mirth client class
+                    // Step 5: make a request to mirth with output array
+
+                    if(empty($this->siteConfig['hl7_schema'])){
+                        break;
+                    }
+
+                    $prefix = 'redcap_mirth_client';
+                    $enabled_modules = ExternalModules::getEnabledModules($this->patientProjectId);
+                    if (!isset($enabled_modules[$prefix])) {
+                        break;
+                    }
+
+                    foreach ($this->siteConfig['hl7_schema'] as $key => $value) {
+                        $message[$key] = send_rx_piping($value, $data);
+                    }
+
+                    $mirth = ExternalModules::getModuleInstance($prefix, $enabled_modules[$prefix]);
+                    $mirth = $mirth->getClient();
+                    try {
+                       $mirth->request($message);
+                    }
+                    catch (Exception $e) {
+                        // TODO: Handle error.
+                        print_r($e);
+                    }
+
                     break;
+
             }
         }
 
