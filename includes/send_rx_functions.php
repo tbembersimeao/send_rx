@@ -44,10 +44,12 @@ function send_rx_get_project_config($project_id, $project_type) {
     while ($result = db_fetch_assoc($q)) {
         if ($result['type'] == 'json') {
             $result['value'] = json_decode($result['value']);
-
             if (strpos($result['key'], 'send-rx-pdf-template-variable-') === false) {
                 $result['value'] = reset($result['value']);
             }
+        }
+        if($result['type'] == 'file') {
+            $result['value'] = json_decode(send_rx_get_edoc_file_contents($result['value']));
         }
 
         $config[str_replace('-', '_', str_replace('send-rx-', '', $result['key']))] = $result['value'];
@@ -56,7 +58,7 @@ function send_rx_get_project_config($project_id, $project_type) {
     if ($config['type'] != $project_type || empty($config['target_project_id'])) {
         return false;
     }
-
+    
     if (!empty($config['pdf_template_variable_key'])) {
         $config['pdf_template_variables'] = array_combine($config['pdf_template_variable_key'], $config['pdf_template_variable_value']);
     }
