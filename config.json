@@ -118,7 +118,6 @@
         {
             "key": "send-rx-hl7-schema",
             "name": "HL7 Schema",
-            "required": false,
             "type": "file"
         }
     ]

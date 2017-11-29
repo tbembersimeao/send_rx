@@ -48,7 +48,7 @@ function send_rx_get_project_config($project_id, $project_type) {
                 $result['value'] = reset($result['value']);
             }
         }
-        if($result['type'] == 'file') {
+        elseif ($result['type'] == 'file') {
             $result['value'] = json_decode(send_rx_get_edoc_file_contents($result['value']));
         }
 
@@ -58,7 +58,7 @@ function send_rx_get_project_config($project_id, $project_type) {
     if ($config['type'] != $project_type || empty($config['target_project_id'])) {
         return false;
     }
-    
+
     if (!empty($config['pdf_template_variable_key'])) {
         $config['pdf_template_variables'] = array_combine($config['pdf_template_variable_key'], $config['pdf_template_variable_value']);
     }

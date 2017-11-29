@@ -377,8 +377,6 @@ class RxSender {
      * Sends the message to the site and returns whether the operation was successful.
      */
     function send($generate_pdf = true, $log = true) {
-        $success = false;
-
         if ($generate_pdf) {
             $this->generatePDFFile();
         }
@@ -406,13 +404,7 @@ class RxSender {
                     break;
 
                 case 'hl7':
-                    // Step 1: check for schema from config
-                    // Step 2: create an output array
-                    // Step 3: loop over schema, pipe each row and populate output array
-                    // Step 4: instantiate mirth client class
-                    // Step 5: make a request to mirth with output array
-
-                    if(empty($this->siteConfig['hl7_schema'])){
+                    if (empty($this->siteConfig['hl7_schema']) || !is_array($this->siteConfig['hl7_schema'])) {
                         break;
                     }
 
@@ -426,18 +418,24 @@ class RxSender {
                         $message[$key] = send_rx_piping($value, $data);
                     }
 
+                    $success = true;
+                    $error_msg = '';
+
                     $mirth = ExternalModules::getModuleInstance($prefix, $enabled_modules[$prefix]);
                     $mirth = $mirth->getClient();
+
                     try {
-                       $mirth->request($message);
+                        $mirth->request($message);
                     }
                     catch (Exception $e) {
-                        // TODO: Handle error.
-                        print_r($e);
+                        $error_msg = $e->getMessage();
+                        $success = false;
                     }
 
-                    break;
+                    // TODO: recipients?
+                    $this->log($type, $success, array(), 'HL7 Message', json_encode($message), $error_msg);
 
+                    break;
             }
         }
 
@@ -493,9 +491,9 @@ class RxSender {
     /**
      * Logs message send operation.
      */
-    protected function log($msg_type, $success, $recipients, $subject, $body) {
+    protected function log($msg_type, $success, $recipients, $subject, $body, $error_msg = '') {
         // Appending a new entry to the log list.
-        $this->logs[] = array($msg_type, $success, time(), $recipients, $this->username, $subject, $body, $this->patientData['send_rx_pdf']);
+        $this->logs[] = array($msg_type, $success, time(), $this->username, $error_msg, $recipients, $subject, $body, $msg_type == 'email' ? $this->patientData['send_rx_pdf'] : '');
         $contents = json_encode($this->logs);
 
         $file_path = $this->generateTmpFilePath('json');
