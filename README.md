@@ -79,7 +79,7 @@ Send Rx requires Table-base authentication method to work, so if your REDCap doe
 ### Step 2: Create a Site/Pharmacy
 1. On site project, go to **Add / Edit records** and then click on **Add new record**.
 2. Fill **Site Information** form step and go ahead to the next step
-3. On **Delivery methods step**, choose `Email` as the delivery type, then fill the email address you want to use in your test, and save.
+3. On **Delivery methods step**, choose `Email` or `HL7` as the delivery type. Fill the email address you want to use in your test, and save if delivery type is chosen as `Email`.
 4. On **Site Staff** step, add the test users you created previously (make sure to add prescribers and at least one study coordinator), then click on **Save & Exit**
 5. On record home page, will might be able to see two buttons: **Rebuild staff permissions** and **Revoke staff permissions**
 6. Click on **Rebuild staff permissions** to grant permissions to your staff
@@ -90,8 +90,14 @@ Send Rx requires Table-base authentication method to work, so if your REDCap doe
 3. Complete all steps until the last step (**Review & Send Rx**).
 5. On review step, click on **Send and Stay**
 6. At **Messages History** block you should now see the notification contents you just sent.
-7. Check your email inbox.
+7. Check if the pdf is delivered in the right manner based on the delivery method chosen.
 
-## Customizing PDF and messages
+## Delivery method customization
+
+### Customizing PDF and messages
 
 The presented example can be fully adapted to your needs. You may freely create your own PDF template, change the email contents configuration, and override all forms/instruments (as soon as the fields containing `send_rx_` prefix remain untouched). All form fields you update/create will available to be used as wildcards on PDF and email (e.g. `[patient][first_name]`, `[site][send_rx_name]`, `[prescriber][first_name]`, etc).
+
+### Customizing HL7
+
+The HL7 fields to redcap fields mapping can be configured as a json in a json file. This file is uploaded as part of the send_rx module config settings in the Site Project under `HL7 Schema` project settings. 
