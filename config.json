@@ -73,9 +73,9 @@
             "type": "project-id"
         },
         {
-            "key": "send-rx-pdf-template-name",
-            "name": "PDF Template Name",
-            "type": "text"
+            "key": "send-rx-pdf-template",
+            "name": "PDF Template",
+            "type": "file"
         },
         {
             "key": "send-rx-pdf-template-variable",

@@ -19,19 +19,19 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#send_rx_logs-tr .data').html(settings.table);
 
     // Changing color of submit buttons.
-    var $submit_buttons = $('button[id^="submit-btn-"]');
-    $submit_buttons.addClass('btn-success');
+    var $submitButtons = $('button[id^="submit-btn-"]');
+    $submitButtons.addClass('btn-success');
 
     // Disables submit buttons.
     var disableSubmit = function() {
-        $submit_buttons.prop('disabled', true);
-        $submit_buttons.prop('title', 'Your must complete all form steps before sending the prescription.');
+        $submitButtons.prop('disabled', true);
+        $submitButtons.prop('title', 'Your must complete all form steps before sending the prescription.');
     };
 
     // Enables submit buttons.
     var enableSubmit = function() {
-        $submit_buttons.removeProp('disabled');
-        $submit_buttons.removeProp('title');
+        $submitButtons.removeProp('disabled');
+        $submitButtons.removeProp('title');
     };
 
     if (settings.eventIsComplete) {

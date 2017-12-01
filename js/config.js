@@ -15,7 +15,7 @@ $(document).ready(function() {
 
     $modal.on('shown.bs.modal', function() {
         if ($modal.data('module') === 'send_rx') {
-            $(subject).change(function () {
+            $(subject).change(function() {
                 sendRxBranchingLogic();
             });
 

@@ -292,6 +292,10 @@ class RxSender {
      * Sets site data.
      */
     protected function setSiteData($data) {
+        if ($edoc_id = $data['send_rx_pdf_template']) {
+            $data['send_rx_pdf_template'] = send_rx_get_edoc_file_contents($edoc_id);
+        }
+
         $this->siteData = $data;
     }
 
@@ -301,33 +305,6 @@ class RxSender {
     protected function setPrescriberData() {
         $user_profile = new UserProfile($this->username);
         $this->prescriberData = $user_profile->getProfileData();
-    }
-
-    /**
-     * Gets PDF template contents.
-     */
-    protected function getPDFTemplate() {
-        $pdf_template = $this->siteConfig['pdf_template_name'];
-        if (!empty($this->siteData['send_rx_pdf_template'])) {
-            $pdf_template = $this->siteData['send_rx_pdf_template'];
-        }
-
-        $sql = '
-            SELECT e.doc_id FROM redcap_docs_to_edocs e
-            INNER JOIN redcap_docs d ON
-                d.docs_id = e.docs_id AND
-                d.project_id = "' . db_escape($this->siteProjectId) . '" AND
-                d.docs_comment = "' . db_escape($pdf_template) . '"
-            ORDER BY d.docs_id DESC
-            LIMIT 1';
-
-        $q = db_query($sql);
-        if (!db_num_rows($q)) {
-            return false;
-        }
-
-        $result = db_fetch_assoc($q);
-        return send_rx_get_edoc_file_contents($result['doc_id']);
     }
 
     /**
@@ -452,7 +429,7 @@ class RxSender {
      * Generates the prescription PDF file.
      */
     function generatePDFFile() {
-        if (!$contents = $this->getPDFTemplate()) {
+        if (!($contents = $this->siteData['send_rx_pdf_template']) && !($contents = $this->siteConfig['pdf_template'])) {
             return false;
         }
 
@@ -470,7 +447,7 @@ class RxSender {
         if (!empty($this->patientData['send_rx_pdf'])) {
             $last_log = end($this->logs);
 
-            if (!$last_log || $this->patientData['send_rx_pdf'] != $last_log[7]) {
+            if (!$last_log || $this->patientData['send_rx_pdf'] != $last_log[8]) {
                 // Removing non logged PDF file.
                 send_rx_edoc_file_delete($this->patientData['send_rx_pdf']);
             }
@@ -495,7 +472,7 @@ class RxSender {
      */
     protected function log($msg_type, $success, $recipients, $subject, $body, $error_msg = '') {
         // Appending a new entry to the log list.
-        $this->logs[] = array($msg_type, $success, time(), $this->username, $error_msg, $recipients, $subject, $body, $msg_type == 'email' ? $this->patientData['send_rx_pdf'] : '');
+        $this->logs[] = array($msg_type, $success, time(), $this->username, $recipients, $subject, $body, $error_msg, $msg_type == 'email' ? $this->patientData['send_rx_pdf'] : '');
         $contents = json_encode($this->logs);
 
         $file_path = $this->generateTmpFilePath('json');

@@ -61,7 +61,7 @@ class ExternalModule extends AbstractExternalModule {
             );
 
             // Rows header.
-            $header = array('Type', 'Success', 'Time', 'Recipients', 'User ID', 'Subject', 'Body');
+            $header = array('Type', 'Success', 'Time', 'User ID', 'Recipients', 'Subject', 'Body', 'Error message');
 
             // Creating logs table.
             $table = '<div class="table-responsive"><table class="table table-condensed"><thead><tr>';
@@ -75,6 +75,11 @@ class ExternalModule extends AbstractExternalModule {
 
             // Populating tables and creating one modal for each entry.
             foreach (array_reverse($logs) as $key => $row) {
+                $elements = $row[0] == 'email' ? range(3, 6) : array(3, 6);
+                if (!empty($row[7])) {
+                    $elements[] = 7;
+                }
+
                 $table .= '<tr>';
 
                 $row[0] = $types[$row[0]];
@@ -100,11 +105,11 @@ class ExternalModule extends AbstractExternalModule {
                                 </div>
                                 <div class="modal-body" style="overflow-wrap:break-word;word-wrap:break-word;"><form>';
 
-                foreach (range(3, 6) as $i) {
+                foreach ($elements as $element) {
                     $modals .= '
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">' . $header[$i] . '</label>
-                            <div class="col-sm-10">' . $row[$i] . '</div>
+                            <label class="col-sm-2 col-form-label">' . $header[$element] . '</label>
+                            <div class="col-sm-10">' . $row[$element] . '</div>
                         </div>';
                 }
 

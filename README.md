@@ -6,6 +6,7 @@ Send Rx is a REDCap module that allows users to automatically generate prescript
 - REDCap >= 8.0.0 (for versions < 8.0.0, [REDCap Modules](https://github.com/vanderbilt/redcap-external-modules) is required).
 - [Composer](https://getcomposer.org/)
 - [REDCap User Profile](https://github.com/ctsit/redcap_user_profile)
+- [REDCap Mirth Client](https://github.com/ctsit/redcap_mirth_client) (if sending prescriptions via HL7 messages)
 
 ## Installation
 - Clone this repo into to an `<redcap-root>/modules/send_rx_v1.0`.
@@ -39,13 +40,11 @@ Send Rx requires Table-base authentication method to work, so if your REDCap doe
 ### Step 3: Creating Sites Project
 1. Make sure you are logged in as the admin user created on step 1 (not `site_admin`)
 2. Access **+ New Project** page, then import `samples/SendRxSites.xml` file.
-3. Access **File Repository** page, then go to **Upload New File** tab
-4. Upload `SamplePDFTemplate.html` file provided by this repository, name it as `SamplePDFTemplate`, and save.
-5. Go to **Manage Extensions** section and enable Send Rx module for this project
-6. Yet on Manage Extensions page, click on Send Rx **Configure** button and set fields as follows:
+3. Go to **Manage Extensions** section and enable Send Rx module for this project
+4. Yet on Manage Extensions page, click on Send Rx **Configure** button and set fields as follows:
   - Type: Site
   - Target Project: (Leave it blank for now, you are going to set it on step 4.8)
-  - PDF Template Name: "SamplePDFTemplate"
+  - PDF Template Name: (upload `SamplePDFTemplate.html`) file
   - PDF Template Variables:
     - Key: "study_irb", Value: "2017-1234"
     - Key: "study_name", Value: "Sample Study"
@@ -90,6 +89,19 @@ Send Rx requires Table-base authentication method to work, so if your REDCap doe
 6. At **Messages History** block you should now see the notification contents you just sent.
 7. Check your email inbox.
 
-## Customizing PDF and messages
+## Customizing PDF and email messages
 
 The presented example can be fully adapted to your needs. You may freely create your own PDF template, change the email contents configuration, and override all forms/instruments (as soon as the fields containing `send_rx_` prefix remain untouched). All form fields you update/create will available to be used as wildcards on PDF and email (e.g. `[patient][first_name]`, `[site][send_rx_name]`, `[prescriber][first_name]`, etc).
+
+## HL7 Messages
+The previous steps describe how to send prescriptions via email. As you might have noticed, there is also "HL7" delivery type. [Mirth Connect](https://www.mirth.com/) is the adopted channel for that method. What you need is to create and configure a Mirth Connect server that builds and handles HL7 messages according to your needs. Once you have it, you need to enable and configure [REDCap Mirth Client](https://github.com/ctsit/redcap_mirth_client) in order to send the prescriptions data to Mirth.
+
+To define the schema of fields that will be addressed to Mirth, go to the the Sites project, access **Control Center > Manage External Modules** and upload your schema JSON file on "HL7 schema" field. As PDF templates, you may specify your data through wildcards. Example:
+```json
+{
+    "patient_first_name": "[patient][first_name]",
+    "site_name": "[site][send_rx_name]",
+    "prescriber_first_name": "[prescriber][first_name]"
+}
+```
+For further details, see [REDCap Mirth Client](https://github.com/ctsit/redcap_mirth_client) documentation.

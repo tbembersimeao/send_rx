@@ -49,7 +49,11 @@ function send_rx_get_project_config($project_id, $project_type) {
             }
         }
         elseif ($result['type'] == 'file') {
-            $result['value'] = json_decode(send_rx_get_edoc_file_contents($result['value']));
+            $result['value'] = send_rx_get_edoc_file_contents($result['value']);
+
+            if ($result['key'] == 'send-rx-hl7-schema') {
+                $result['value'] = json_decode($result['value']);
+            }
         }
 
         $config[str_replace('-', '_', str_replace('send-rx-', '', $result['key']))] = $result['value'];
@@ -404,6 +408,7 @@ function send_rx_get_site_users($project_id, $site_id, $user_role = null) {
         if (empty($user_role) || $user_info['send_rx_user_role'] == $user_role) {
             $user_profile = new UserProfile($user_info['send_rx_user_id']);
             $user_profile = $user_profile->getProfileData();
+            $user_profile['send_rx_user_id'] = $user_info['send_rx_user_id'];
             $user_profile['send_rx_user_role'] = $user_info['send_rx_user_role'];
 
             $users[] = $user_profile;
